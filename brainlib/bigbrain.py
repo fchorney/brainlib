@@ -1,41 +1,37 @@
 import textwrap
 
 from os.path import join
-from PIL import (
-    Image,
-    ImageFont,
-    ImageDraw,
-)
+from PIL import Image, ImageFont, ImageDraw
 from imgurpython import ImgurClient
 
 
 def bigbrain(
     messages,
-    imgdir='./',
+    imgdir="./",
     bgcolour=[255, 255, 255, 255],
-    fontpath='/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+    fontpath="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
     fontsize=22,
     fontcolour=[0, 0, 0, 255],
     wraplength=20,
     heightpadding=5,
     client_id=None,
     client_secret=None,
-    upload=False
+    upload=False,
 ):
 
     # Make sure messages is the correct length
     if len(messages) > 10:
-        print 'Messages must be 10 items or less'
+        print("Messages must be 10 items or less")
         return None, None
 
     # If upload is set, make sure we have client id and secret
     if upload and (client_id is None or client_secret is None):
-        print 'Must supply client_id and client_secret if upload is set'
+        print("Must supply client_id and client_secret if upload is set")
         return None, None
 
     # Set image paths
-    brain_img_path = join(imgdir, '10-brain-template.png')
-    output_img_path = join(imgdir, 'new-brain.png')
+    brain_img_path = join(imgdir, "10-brain-template.png")
+    output_img_path = join(imgdir, "new-brain.png")
 
     # Open up Base Image
     base_img = Image.open(brain_img_path)
@@ -58,24 +54,14 @@ def bigbrain(
     ]
 
     # Cutoffs
-    cutoffs = [
-        299,
-        607,
-        885,
-        1204,
-        1592,
-        1974,
-        2430,
-        2950,
-        3565,
-    ]
+    cutoffs = [299, 607, 885, 1204, 1592, 1974, 2430, 2950, 3565]
 
     for msg, config in zip(messages, configs):
         # Grab image config
         X, Y, MAX_W, MAX_H = config
 
         # Create a new image
-        img = Image.new('RGB', (MAX_W, MAX_H), tuple(bgcolour))
+        img = Image.new("RGB", (MAX_W, MAX_H), tuple(bgcolour))
         draw = ImageDraw.Draw(img)
 
         # Separate our message with textwrap
@@ -83,10 +69,7 @@ def bigbrain(
 
         # Determine message height
         line_count = len(wrapped_msg)
-        message_height = (
-            (fontsize * line_count) +
-            (heightpadding * (line_count - 1))
-        )
+        message_height = (fontsize * line_count) + (heightpadding * (line_count - 1))
 
         # Vertically allign the message to be in the centre
         current_height = ((MAX_H - message_height) / 2) - (fontsize / 2)
@@ -94,10 +77,7 @@ def bigbrain(
         for line in wrapped_msg:
             w, h = font.getsize(line)
             draw.text(
-                ((MAX_W - w) / 2, current_height),
-                line,
-                tuple(fontcolour),
-                font=font,
+                ((MAX_W - w) / 2, current_height), line, tuple(fontcolour), font=font
             )
             current_height += h + heightpadding
 
@@ -117,7 +97,7 @@ def bigbrain(
     if upload:
         imgur_client = ImgurClient(client_id, client_secret)
         data = imgur_client.upload_from_path(output_img_path, anon=True)
-        imgur_link = data['link']
+        imgur_link = data["link"]
 
         # Return the output image path, and the imgur link
         return output_img_path, imgur_link
