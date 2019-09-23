@@ -1,3 +1,5 @@
+.DS_Store
 *.png
 !10-brain-template.png
 *.pyc
+venv/
